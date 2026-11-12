@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --color-night: #0a0a0f;
+  --color-obsidian: #111118;
+  --color-moon: #f5f0e8;
+  --color-ivory: #faf7f2;
+  --color-gold: #e8c84a;
+  --color-gold-dim: #c9a82e;
+  --color-gold-pale: #f7e9a0;
+  --color-void: #05050a;
+  /* Azules nocturnos */
+  --color-abyss: #060d1a;
+  --color-deep: #0d1b2e;
+  --color-midnight: #112240;
+  --color-dusk: #1b3358;
+  --color-steel: #2a4a72;
+  --color-mist: #4a7ab5;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Outfit', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #060d1a;
+  color: #f5f0e8;
+  font-family: 'Outfit', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #060d1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #e8c84a40;
+  border-radius: 2px;
+}
+
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.gold-shimmer {
+  background: linear-gradient(90deg, #c9a82e, #e8c84a, #f7e9a0, #e8c84a, #c9a82e);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: twinkle var(--dur, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: var(--min-op, 0.2); transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.card-hover {
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease;
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(232, 200, 74, 0.12);
+}
+
+.btn-gold {
+  background: #e8c84a;
+  color: #0a0a0f;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 0.875rem 2rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.btn-gold:hover {
+  background: #f7e9a0;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #e8c84a;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 0.875rem 2rem;
+  border: 1px solid #e8c84a60;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-outline:hover {
+  background: #e8c84a12;
+  border-color: #e8c84a;
+}
+
+.moon-glow {
+  filter: drop-shadow(0 0 40px rgba(232, 200, 74, 0.3));
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+.float-anim {
+  animation: float 6s ease-in-out infinite;
+}
+
+.section-divider {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e8c84a, transparent);
+  margin: 0 auto;
+}
+
+/* Utilidades azul nocturno */
+.bg-abyss   { background-color: #060d1a; }
+.bg-deep    { background-color: #0d1b2e; }
+.bg-midnight{ background-color: #112240; }
+.bg-dusk    { background-color: #1b3358; }
+.bg-steel   { background-color: #2a4a72; }
+
+.blue-glow {
+  box-shadow: 0 0 40px rgba(42, 74, 114, 0.5), 0 0 80px rgba(17, 34, 64, 0.4);
+}
+
+.card-blue-border {
+  border: 1px solid #2a4a7240;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.card-blue-border:hover {
+  border-color: #4a7ab570;
+  box-shadow: 0 12px 40px rgba(17, 34, 64, 0.6), 0 0 0 1px #2a4a7240;
+}
+
+/* Gradiente hero con azul profundo */
+.hero-gradient {
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, #1b3358 0%, #0d1b2e 40%, #060d1a 100%);
+}
+
+/* Gradiente de sección */
+.section-blue {
+  background: linear-gradient(180deg, #060d1a 0%, #0d1b2e 50%, #060d1a 100%);
+}
+
+/* Glassmorphism azul */
+.glass-blue {
+  background: rgba(13, 27, 46, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(74, 122, 181, 0.15);
+}
+
+/* Estrella con tinte azul */
+.star-blue {
+  position: absolute;
+  border-radius: 50%;
+  background: #a8c8f0;
+  animation: twinkle var(--dur, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
