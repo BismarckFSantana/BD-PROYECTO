@@ -1,4 +1,4 @@
-# LUNA FASHION 🌙
+# Luna Fashion 🌙
 
 ## Tecnologías y Entorno
 
@@ -58,3 +58,11 @@ La tienda obtiene sus productos desde `GET /api/products`. El navegador solo lla
 4. En una terminal ejecuta `pnpm api:dev` para iniciar el API. En otra, ejecuta `pnpm dev` para iniciar la interfaz. Vite reenvía `/api` al servidor local en el puerto 3001.
 
 El filtro de colección usa el campo `estilo` de `producto`; los valores disponibles aparecerán automáticamente como filtros. El carrito sigue siendo local a la interfaz, como antes. Para producción, despliega el API en un servidor accesible por la aplicación y define `VITE_API_URL` como la URL base del API; configura también `CORS_ORIGIN` en el API con el origen de la aplicación.
+
+### Cargar imágenes de productos
+
+1. Define `PRODUCT_IMAGE_UPLOAD_TOKEN` en `.env` con una clave aleatoria larga y privada.
+2. Inicia el API y abre `/admin` en el navegador.
+3. Ingresa la clave, elige una imagen JPG, PNG o WebP de hasta 5 MB y selecciona **Guardar imagen**. El servidor guarda el archivo en `uploads/` y actualiza `producto.ruta_imagen`; el catálogo carga la imagen desde esa ruta.
+
+Las imágenes se guardan en el disco del servidor. En producción, usa un disco persistente y sirve la aplicación y el API por HTTPS. La clave no se guarda en el navegador y se debe volver a ingresar al abrir el administrador.

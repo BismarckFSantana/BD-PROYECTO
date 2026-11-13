@@ -21,6 +21,21 @@ type Product = {
   desc: string
 }
 
+type AdminProduct = {
+  id: number
+  name: string
+  color: string
+  category: string
+  img: string
+}
+
+const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+
+function getImageUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) return path
+  return `${API_URL}${path.startsWith('/') ? path : `/${path}`}`
+}
+
 function isProduct(value: unknown): value is Product {
   if (typeof value !== 'object' || value === null) return false
   const product = value as Record<string, unknown>
@@ -34,6 +49,30 @@ function isProduct(value: unknown): value is Product {
     typeof product.img === 'string' &&
     typeof product.desc === 'string'
   )
+}
+
+function isAdminProduct(value: unknown): value is AdminProduct {
+  if (typeof value !== 'object' || value === null) return false
+  const product = value as Record<string, unknown>
+  return (
+    typeof product.id === 'number' &&
+    typeof product.name === 'string' &&
+    typeof product.color === 'string' &&
+    typeof product.category === 'string' &&
+    typeof product.img === 'string'
+  )
+}
+
+async function getApiError(response: Response) {
+  try {
+    const body: unknown = await response.json()
+    if (typeof body === 'object' && body !== null && 'error' in body && typeof body.error === 'string') {
+      return body.error
+    }
+  } catch {
+    // Use the HTTP status when the server does not return a JSON error.
+  }
+  return `La solicitud falló (HTTP ${response.status}).`
 }
 
 function formatCOP(n: number) {
@@ -115,7 +154,7 @@ function Navbar({ cartCount, onCartClick }: { cartCount: number; onCartClick: ()
       <div className="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between h-16 md:h-20">
         <div className="font-display text-xl md:text-2xl tracking-widest text-[#f5f0e8] select-none">
           <span className="gold-shimmer">LUNA</span>
-          <span className="text-[#f5f0e8] opacity-60 ml-1 text-sm font-normal tracking-[0.3em] align-middle">NOIR</span>
+          <span className="text-[#f5f0e8] opacity-60 ml-1 text-sm font-normal tracking-[0.3em] align-middle">FASHION</span>
         </div>
 
         {/* Desktop nav */}
@@ -262,11 +301,11 @@ function FeaturedBanner() {
         <div>
           <p className="text-[#e8c84a] text-xs tracking-[0.4em] uppercase mb-4">Editorial</p>
           <h2 className="font-display text-4xl md:text-5xl text-[#f5f0e8] leading-tight mb-6">
-            La Noche Como<br />
-            <em className="text-[#e8c84a]">Segundo Piel</em>
+            Elegancia para<br />
+            <em className="text-[#e8c84a]">cada ocasión</em>
           </h2>
           <p className="text-[#f5f0e8] opacity-50 leading-relaxed mb-8 max-w-md">
-            Cada vestido LUNA NOIR está diseñado para quienes encuentran su poder al caer el sol.
+            Cada diseño de Luna Fashion celebra la elegancia y la confianza en cada ocasión.
             Telas seleccionadas a mano. Cortes que acompañan cada movimiento.
           </p>
           <div className="flex gap-8 mb-8">
@@ -331,7 +370,7 @@ function ProductCard({
           </div>
         )}
         <img
-          src={product.img}
+          src={getImageUrl(product.img)}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           style={{ opacity: imgLoaded ? 1 : 0, transition: 'opacity 0.4s' }}
@@ -678,7 +717,7 @@ function CartDrawer({
               {items.map((item, idx) => (
                 <div key={`${item.id}-${idx}`} className="flex gap-4">
                   <img
-                    src={item.img}
+                    src={getImageUrl(item.img)}
                     alt={item.name}
                     className="w-16 h-20 object-cover flex-shrink-0"
                     style={{ background: '#0d1b2e' }}
@@ -727,7 +766,7 @@ function Footer() {
           <div className="col-span-2 md:col-span-1">
             <div className="font-display text-2xl tracking-widest text-[#f5f0e8] mb-4">
               <span className="gold-shimmer">LUNA</span>
-              <span className="opacity-40 ml-1 text-sm font-normal tracking-[0.3em] align-middle">NOIR</span>
+              <span className="opacity-40 ml-1 text-sm font-normal tracking-[0.3em] align-middle">FASHION</span>
             </div>
             <p className="text-[#f5f0e8] opacity-30 text-xs leading-relaxed">
               Diseños nocturnos para mujeres que brillan en la oscuridad.
@@ -736,7 +775,7 @@ function Footer() {
           {[
             ['Colección', ['Vestidos Negros', 'Vestidos Blancos', 'Nueva Temporada', 'Lookbook']],
             ['Atención', ['Mi Cuenta', 'Pedidos', 'Guía de Tallas', 'Devoluciones']],
-            ['Contacto', ['hola@lunanoir.co', 'WhatsApp', 'Instagram', 'Facebook']],
+            ['Contacto', ['Escríbenos', 'WhatsApp', 'Instagram', 'Facebook']],
           ].map(([title, links]) => (
             <div key={title as string}>
               <h4 className="text-[#e8c84a] text-[10px] tracking-[0.3em] uppercase mb-4 opacity-70">
@@ -759,16 +798,225 @@ function Footer() {
           style={{ borderTop: '1px solid rgba(74,122,181,0.1)' }}
         >
           <p className="text-[#f5f0e8] opacity-20 text-[10px] tracking-wider">
-            © 2026 LUNA NOIR · Todos los derechos reservados
+            © 2026 Luna Fashion · Todos los derechos reservados
           </p>
-          <p className="text-[#e8c84a] opacity-20 text-[10px] tracking-wider">✦ Hecho con amor bajo la luna</p>
+          <div className="flex items-center gap-5">
+            <a href="/admin" className="text-[#f5f0e8] opacity-30 text-[10px] tracking-wider hover:opacity-70">
+              Administrar imágenes
+            </a>
+            <p className="text-[#e8c84a] opacity-20 text-[10px] tracking-wider">✦ Hecho con amor bajo la luna</p>
+          </div>
         </div>
       </div>
     </footer>
   )
 }
 
-export default function App() {
+function ImageManager() {
+  const [token, setToken] = useState('')
+  const [tokenInput, setTokenInput] = useState('')
+  const [products, setProducts] = useState<AdminProduct[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    document.title = 'Administrar imágenes | Luna Fashion'
+  }, [])
+
+  const loadProducts = async (uploadToken: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`${API_URL}/api/admin/products`, {
+        headers: { Authorization: `Bearer ${uploadToken}` },
+      })
+      if (!response.ok) throw new Error(await getApiError(response))
+
+      const data: unknown = await response.json()
+      if (!Array.isArray(data) || !data.every(isAdminProduct)) {
+        throw new Error('La respuesta del servidor contiene productos con formato inválido.')
+      }
+
+      setToken(uploadToken)
+      setProducts(data)
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : 'No se pudieron cargar los productos.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const updateProductImage = (productId: number, imagePath: string) => {
+    setProducts(current =>
+      current.map(product => product.id === productId ? { ...product, img: imagePath } : product),
+    )
+  }
+
+  return (
+    <main className="min-h-screen px-5 py-12 md:px-8" style={{ background: '#060d1a' }}>
+      <div className="mx-auto max-w-5xl">
+        <a href="/" className="text-xs tracking-widest text-[#e8c84a] hover:text-[#f7e9a0]">
+          ← Luna Fashion
+        </a>
+        <header className="my-10">
+          <p className="mb-3 text-xs uppercase tracking-[0.4em] text-[#e8c84a] opacity-70">Administración</p>
+          <h1 className="font-display text-4xl text-[#f5f0e8] md:text-5xl">Imágenes de productos</h1>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#f5f0e8] opacity-60">
+            Sube una imagen JPG, PNG o WebP de hasta 5 MB. Se guardará en el servidor y su ruta se actualizará en la base de datos.
+          </p>
+        </header>
+
+        {!token ? (
+          <form
+            className="max-w-xl border border-[#4a7ab5]/20 bg-[#0d1b2e] p-6"
+            onSubmit={event => {
+              event.preventDefault()
+              void loadProducts(tokenInput)
+            }}
+          >
+            <label htmlFor="admin-token" className="mb-2 block text-sm text-[#f5f0e8]">
+              Clave de administración
+            </label>
+            <input
+              id="admin-token"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={tokenInput}
+              onChange={event => setTokenInput(event.target.value)}
+              className="mb-4 w-full border border-[#4a7ab5]/30 bg-[#060d1a] px-4 py-3 text-sm text-[#f5f0e8] outline-none focus:border-[#e8c84a]"
+            />
+            {error && <p role="alert" className="mb-4 text-sm text-red-300">{error}</p>}
+            <button type="submit" className="btn-gold" disabled={loading}>
+              {loading ? 'Verificando…' : 'Entrar'}
+            </button>
+          </form>
+        ) : (
+          <>
+            <div className="mb-6 flex items-center justify-between">
+              <p className="text-sm text-[#f5f0e8] opacity-60">{products.length} productos</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setToken('')
+                  setTokenInput('')
+                  setProducts([])
+                }}
+                className="text-xs text-[#e8c84a] hover:text-[#f7e9a0]"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+            {error && <p role="alert" className="mb-4 text-sm text-red-300">{error}</p>}
+            {products.length === 0 ? (
+              <p className="border border-[#4a7ab5]/20 bg-[#0d1b2e] p-6 text-sm text-[#f5f0e8] opacity-60">
+                No hay productos en la base de datos.
+              </p>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {products.map(product => (
+                  <AdminProductImageCard
+                    key={product.id}
+                    product={product}
+                    token={token}
+                    onImageUpdated={imagePath => updateProductImage(product.id, imagePath)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </main>
+  )
+}
+
+function AdminProductImageCard({
+  product,
+  token,
+  onImageUpdated,
+}: {
+  product: AdminProduct
+  token: string
+  onImageUpdated: (imagePath: string) => void
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
+  const upload = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!file) return
+
+    setUploading(true)
+    setMessage(null)
+    setUploadError(null)
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+      const response = await fetch(`${API_URL}/api/admin/products/${product.id}/image`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      })
+      if (!response.ok) throw new Error(await getApiError(response))
+
+      const result: unknown = await response.json()
+      if (typeof result !== 'object' || result === null || !('imagePath' in result) || typeof result.imagePath !== 'string') {
+        throw new Error('La respuesta del servidor no contiene la ruta de la imagen.')
+      }
+
+      onImageUpdated(result.imagePath)
+      setFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      setMessage('Imagen actualizada.')
+    } catch (uploadFailure) {
+      setUploadError(uploadFailure instanceof Error ? uploadFailure.message : 'No se pudo subir la imagen.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <article className="overflow-hidden border border-[#4a7ab5]/20 bg-[#0d1b2e]">
+      <img
+        src={getImageUrl(product.img)}
+        alt={product.name}
+        className="h-64 w-full object-cover"
+        style={{ background: '#060d1a' }}
+      />
+      <div className="p-5">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[#e8c84a]">{product.category} · {product.color}</p>
+        <h2 className="mt-2 font-display text-xl text-[#f5f0e8]">{product.name}</h2>
+        <form className="mt-5" onSubmit={event => void upload(event)}>
+          <label className="mb-3 block text-xs text-[#f5f0e8] opacity-70">
+            Seleccionar imagen
+            <input
+              ref={fileInputRef}
+              className="mt-2 block w-full text-xs text-[#f5f0e8] file:mr-3 file:border-0 file:bg-[#e8c84a] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#0a0a0f]"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={event => {
+                setFile(event.target.files?.[0] ?? null)
+                setMessage(null)
+                setUploadError(null)
+              }}
+            />
+          </label>
+          <button type="submit" className="btn-gold w-full" disabled={!file || uploading}>
+            {uploading ? 'Subiendo…' : 'Guardar imagen'}
+          </button>
+          {message && <p role="status" className="mt-3 text-xs text-green-300">{message}</p>}
+          {uploadError && <p role="alert" className="mt-3 text-xs text-red-300">{uploadError}</p>}
+        </form>
+      </div>
+    </article>
+  )
+}
+
+function Storefront() {
   const [products, setProducts] = useState<Product[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
   const [productsError, setProductsError] = useState<string | null>(null)
@@ -845,4 +1093,8 @@ export default function App() {
       />
     </div>
   )
+}
+
+export default function App() {
+  return window.location.pathname === '/admin' ? <ImageManager /> : <Storefront />
 }

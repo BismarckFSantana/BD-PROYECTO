@@ -1,5 +1,7 @@
 {
-  "description": "Showcases a stylish ecommerce platform for black, white, and yellow dresses inspired by night and moon themes, optimized for phone and desktop use.",
+  "title": "Luna Fashion",
+  "language": "es",
+  "description": "Luna Fashion: diseños inspirados en la luna y la noche, para cada ocasión.",
   "robots": {
     "index": false
   },
