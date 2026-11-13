@@ -28,6 +28,8 @@ CREATE TABLE PROVEEDOR
 
     PAGO_ENVIO DECIMAL (5,2) NOT NULL,
 
+	CANTIDAD_PRODUCTO INT NOT NULL,
+
     CONSTRAINT PK_PROVEEDOR PRIMARY KEY CLUSTERED (ID_PROVEEDOR ASC),
 
     CONSTRAINT CK_PROVEEDOR_TELEFONO_PROVEEDOR CHECK (LEN(TELEFONO_PROVEEDOR) >= 8 ),
@@ -42,7 +44,7 @@ CREATE TABLE PROVEEDOR
 
 GO
 
-SELECT *FROM PROVEEDOR;
+
 
 
 
@@ -68,8 +70,6 @@ CREATE TABLE almacen
 
 GO
 
-
-
 CREATE TABLE repartidor
 
 (
@@ -87,10 +87,7 @@ CREATE TABLE repartidor
     CONSTRAINT CK_repartidor_nombre_repartidor CHECK (nombre_repartidor NOT LIKE '%[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]%')
 
 );
-
 GO
-
-
 
 CREATE TABLE producto
 
@@ -99,6 +96,8 @@ CREATE TABLE producto
     id_producto INT IDENTITY(1,1),
 
     id_repartidor INT NOT NULL,
+
+	id_proveedor INT NOT NULL,
 
     nombre_producto nvarchar(50) NOT NULL,
 
@@ -118,14 +117,14 @@ CREATE TABLE producto
 
     CONSTRAINT FK_producto_repartidor FOREIGN KEY (id_repartidor) REFERENCES repartidor (id_repartidor),
 
+	CONSTRAINT FK_producto_proveedor FOREIGN KEY (id_proveedor) REFERENCES proveedor (id_proveedor),
+
     CONSTRAINT CK_producto_categoria CHECK (categoria IN ('F', 'M', 'U')),
 
     CONSTRAINT CK_producto_nombre_producto CHECK (nombre_producto NOT LIKE '%[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]%'),
 
-    CONSTRAINT CK_producto_color CHECK (color NOT LIKE '%[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]%')
-
+    CONSTRAINT CK_producto_color CHECK (color NOT LIKE '%[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]%'),
 );
-
 GO
 
 
@@ -155,10 +154,7 @@ CREATE TABLE variante_producto
     CONSTRAINT CK_variante_producto_stock CHECK (stock > 0)
 
 );
-
 GO
-
-
 
 CREATE TABLE usuario
 
@@ -180,26 +176,19 @@ CREATE TABLE usuario
 
 	direccion_envio nvarchar(200) NOT NULL, 
 
-
     CONSTRAINT PK_usuario PRIMARY KEY CLUSTERED (id_usuario ASC),
 
-    CONSTRAINT CK_numero_Celular_usuario CHECK (LEN(numero_Celular) >= 8 ),
+    CONSTRAINT CK_numero_Celular_usuario CHECK (LEN(numero_Celular) >= 8  AND numero_celular NOT LIKE '%[^0-9]%'),
 
     CONSTRAINT CK_usuario_nombre_usuario CHECK (nombre_usuario NOT LIKE '%[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]%'),
 
-    CONSTRAINT CK_usuario_nombre_usuario CHECK (apellido_usuario NOT LIKE '%[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]%'),
-
     CONSTRAINT CK_usuario_correo CHECK (correo LIKE '%_@_%._%'),
 
-    CONSTRAINT CK_celular_repartidor_repartidor CHECK (LEN(numero_celular) >= 8 AND numero_celular NOT LIKE '%[^0-9]%'),
+    CONSTRAINT CK_celular_repartidor CHECK (LEN(numero_celular) >= 8 AND numero_celular NOT LIKE '%[^0-9]%'),
 
     CONSTRAINT CK_usuario_tipo_Usuario CHECK (tipo_Usuario IN ('T', 'C')) --TRabajor = T y CLiente = C
-
 );
-
 GO
-
-
 
 CREATE TABLE carrito
 
@@ -216,10 +205,7 @@ CREATE TABLE carrito
     CONSTRAINT FK_carrito_usuario FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario)
 
 );
-
 GO
-
-
 
 CREATE TABLE detalle_carrito
 
@@ -238,12 +224,7 @@ CREATE TABLE detalle_carrito
     CONSTRAINT FK_detalle_carrito_variante_producto FOREIGN KEY (id_variante) REFERENCES variante_producto (id_variante)
 
 );
-
 GO
-
-
-
-
 
 CREATE TABLE factura
 
@@ -275,11 +256,10 @@ CREATE TABLE factura
 
     CONSTRAINT FK_factura_variante_producto FOREIGN KEY (id_variante) REFERENCES variante_producto (id_variante),
 
-    CONSTRAINT FK_detalle_carrito_carrito FOREIGN KEY (id_carrito) REFERENCES carrito (id_carrito)
-	
-	
+    CONSTRAINT FK_detalle_carrito FOREIGN KEY (id_carrito) REFERENCES carrito (id_carrito)
 );
 GO
+
 --Calculo de la factura, revisa esto Elian xd
 UPDATE factura
 SET total_pago = (precio_unitario * cantidad) * (1 - (descuento / 100.0))
