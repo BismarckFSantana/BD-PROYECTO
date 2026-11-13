@@ -10,70 +10,31 @@ const STARS = Array.from({ length: 60 }, (_, i) => ({
   minOp: (Math.random() * 0.3 + 0.1).toFixed(2),
 }))
 
-const PRODUCTS = [
-  {
-    id: 1,
-    name: 'Noche Eterna',
-    price: 289000,
-    category: 'Noche',
-    color: 'Negro',
-    tag: 'Más vendido',
-    img: 'https://images.unsplash.com/photo-1589212987511-4a924cb9d8ac?w=600&h=800&fit=crop&auto=format',
-    desc: 'Vestido largo en seda mate con escote en V profundo. Silueta columna.',
-  },
-  {
-    id: 2,
-    name: 'Luna Llena',
-    price: 245000,
-    category: 'Luna',
-    color: 'Blanco',
-    tag: 'Nuevo',
-    img: 'https://images.unsplash.com/photo-1724491216344-86b16f56e57e?w=600&h=800&fit=crop&auto=format',
-    desc: 'Vestido midi en gasa blanca con bordado lunar en el dobladillo.',
-  },
-  {
-    id: 3,
-    name: 'Medianoche',
-    price: 312000,
-    category: 'Noche',
-    color: 'Negro',
-    tag: null,
-    img: 'https://images.unsplash.com/photo-1568251188392-ae32f898cb3b?w=600&h=800&fit=crop&auto=format',
-    desc: 'Vestido asimétrico con capa translúcida. Detalles dorados en el corpiño.',
-  },
-  {
-    id: 4,
-    name: 'Solsticio',
-    price: 198000,
-    category: 'Luna',
-    color: 'Blanco',
-    tag: null,
-    img: 'https://images.unsplash.com/photo-1688597168941-cc8ec4839069?w=600&h=800&fit=crop&auto=format',
-    desc: 'Vestido mini de encaje blanco con forro en satén.',
-  },
-  {
-    id: 5,
-    name: 'Eclipse',
-    price: 275000,
-    category: 'Noche',
-    color: 'Negro',
-    tag: 'Exclusivo',
-    img: 'https://images.unsplash.com/photo-1623580674393-edf6eb7090f8?w=600&h=800&fit=crop&auto=format',
-    desc: 'Vestido corset negro con falda de capas y apliques dorados.',
-  },
-  {
-    id: 6,
-    name: 'Aura Lunar',
-    price: 229000,
-    category: 'Luna',
-    color: 'Blanco',
-    tag: 'Nuevo',
-    img: 'https://images.unsplash.com/photo-1780255355074-b9a1a0272462?w=600&h=800&fit=crop&auto=format',
-    desc: 'Vestido wrap en crepé blanco, manga larga con abertura lateral.',
-  },
-]
+type Product = {
+  id: number
+  name: string
+  price: number
+  category: string
+  color: string
+  tag: string | null
+  img: string
+  desc: string
+}
 
-const CATEGORIES = ['Todos', 'Noche', 'Luna']
+function isProduct(value: unknown): value is Product {
+  if (typeof value !== 'object' || value === null) return false
+  const product = value as Record<string, unknown>
+  return (
+    typeof product.id === 'number' &&
+    typeof product.name === 'string' &&
+    typeof product.price === 'number' &&
+    typeof product.category === 'string' &&
+    typeof product.color === 'string' &&
+    (typeof product.tag === 'string' || product.tag === null) &&
+    typeof product.img === 'string' &&
+    typeof product.desc === 'string'
+  )
+}
 
 function formatCOP(n: number) {
   return '$' + n.toLocaleString('es-CO')
@@ -343,8 +304,8 @@ function ProductCard({
   product,
   onAdd,
 }: {
-  product: (typeof PRODUCTS)[0]
-  onAdd: (p: (typeof PRODUCTS)[0]) => void
+  product: Product
+  onAdd: (p: Product) => void
 }) {
   const [added, setAdded] = useState(false)
   const [imgLoaded, setImgLoaded] = useState(false)
@@ -426,10 +387,27 @@ function ProductCard({
   )
 }
 
-function Collection({ onAdd }: { onAdd: (p: (typeof PRODUCTS)[0]) => void }) {
+function Collection({
+  products,
+  loading,
+  error,
+  onRetry,
+  onAdd,
+}: {
+  products: Product[]
+  loading: boolean
+  error: string | null
+  onRetry: () => void
+  onAdd: (p: Product) => void
+}) {
   const [active, setActive] = useState('Todos')
 
-  const filtered = active === 'Todos' ? PRODUCTS : PRODUCTS.filter(p => p.category === active)
+  const categories = ['Todos', ...new Set(products.map(product => product.category).filter(Boolean))]
+  const selectedCategory = categories.includes(active) ? active : 'Todos'
+  const filtered =
+    selectedCategory === 'Todos'
+      ? products
+      : products.filter(product => product.category === selectedCategory)
 
   return (
     <section className="py-16 md:py-24 px-5" style={{ background: 'linear-gradient(180deg, #060d1a 0%, #0a1628 50%, #060d1a 100%)' }} id="coleccion">
@@ -441,7 +419,7 @@ function Collection({ onAdd }: { onAdd: (p: (typeof PRODUCTS)[0]) => void }) {
           <h2 className="font-display text-4xl md:text-5xl text-[#f5f0e8] mb-4">Nuestros Diseños</h2>
           <div className="section-divider mb-8" />
           <div className="flex justify-center gap-2 flex-wrap">
-            {CATEGORIES.map(cat => (
+            {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setActive(cat)}
@@ -455,9 +433,9 @@ function Collection({ onAdd }: { onAdd: (p: (typeof PRODUCTS)[0]) => void }) {
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   border: '1px solid',
-                  borderColor: active === cat ? '#e8c84a' : 'rgba(232,200,74,0.2)',
-                  background: active === cat ? '#e8c84a' : 'transparent',
-                  color: active === cat ? '#0a0a0f' : '#e8c84a',
+                  borderColor: selectedCategory === cat ? '#e8c84a' : 'rgba(232,200,74,0.2)',
+                  background: selectedCategory === cat ? '#e8c84a' : 'transparent',
+                  color: selectedCategory === cat ? '#0a0a0f' : '#e8c84a',
                 }}
               >
                 {cat}
@@ -466,11 +444,26 @@ function Collection({ onAdd }: { onAdd: (p: (typeof PRODUCTS)[0]) => void }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-8">
-          {filtered.map(p => (
-            <ProductCard key={p.id} product={p} onAdd={onAdd} />
-          ))}
-        </div>
+        {loading ? (
+          <p className="text-center text-[#f5f0e8] opacity-60">Cargando productos...</p>
+        ) : error ? (
+          <div className="text-center text-[#f5f0e8]">
+            <p className="mb-4">{error}</p>
+            <button className="btn-gold px-6 py-2" onClick={onRetry}>Reintentar</button>
+          </div>
+        ) : products.length === 0 ? (
+          <p className="text-center text-[#f5f0e8] opacity-60">No hay productos disponibles.</p>
+        ) : filtered.length === 0 ? (
+          <p className="text-center text-[#f5f0e8] opacity-60">
+            No hay productos disponibles en esta colección.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-8">
+            {filtered.map(product => (
+              <ProductCard key={product.id} product={product} onAdd={onAdd} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
@@ -638,7 +631,7 @@ function CartDrawer({
   onRemove,
 }: {
   open: boolean
-  items: (typeof PRODUCTS)[0][]
+  items: Product[]
   onClose: () => void
   onRemove: (id: number) => void
 }) {
@@ -776,10 +769,51 @@ function Footer() {
 }
 
 export default function App() {
-  const [cart, setCart] = useState<(typeof PRODUCTS)[0][]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [productsLoading, setProductsLoading] = useState(true)
+  const [productsError, setProductsError] = useState<string | null>(null)
+  const [productsAttempt, setProductsAttempt] = useState(0)
+  const [cart, setCart] = useState<Product[]>([])
   const [cartOpen, setCartOpen] = useState(false)
 
-  const addToCart = (p: (typeof PRODUCTS)[0]) => {
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadProducts() {
+      setProductsLoading(true)
+      setProductsError(null)
+
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+        const response = await fetch(`${apiUrl}/api/products`)
+        if (!response.ok) {
+          throw new Error(`No se pudieron cargar los productos (HTTP ${response.status}).`)
+        }
+
+        const data: unknown = await response.json()
+        if (!Array.isArray(data) || !data.every(isProduct)) {
+          throw new Error('La respuesta del servidor contiene productos con formato inválido.')
+        }
+
+        if (!cancelled) setProducts(data)
+      } catch (error) {
+        if (!cancelled) {
+          setProductsError(
+            error instanceof Error ? error.message : 'Ocurrió un error al cargar los productos.',
+          )
+        }
+      } finally {
+        if (!cancelled) setProductsLoading(false)
+      }
+    }
+
+    void loadProducts()
+    return () => {
+      cancelled = true
+    }
+  }, [productsAttempt])
+
+  const addToCart = (p: Product) => {
     setCart(prev => [...prev, p])
   }
 
@@ -792,7 +826,13 @@ export default function App() {
       <Navbar cartCount={cart.length} onCartClick={() => setCartOpen(true)} />
       <Hero />
       <FeaturedBanner />
-      <Collection onAdd={addToCart} />
+      <Collection
+        products={products}
+        loading={productsLoading}
+        error={productsError}
+        onRetry={() => setProductsAttempt(attempt => attempt + 1)}
+        onAdd={addToCart}
+      />
       <MoonPhases />
       <Testimonials />
       <Newsletter />

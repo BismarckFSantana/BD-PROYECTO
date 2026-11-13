@@ -46,3 +46,15 @@ cd BD-PROYECTO
 
 # Instalar las dependencias
 pnpm install
+```
+
+## Conectar productos con SQL Server
+
+La tienda obtiene sus productos desde `GET /api/products`. El navegador solo llama al API; las credenciales de SQL Server permanecen en el servidor.
+
+1. Crea la base de datos y las tablas usando las sentencias `CREATE DATABASE` y `CREATE TABLE` del inicio de `PROYECTOBD.sql`. El resto del archivo contiene ejemplos de consultas y no debe ejecutarse como una migración completa.
+2. Copia `.env.example` a `.env` y configura `DB_SERVER`, `DB_PORT`, `DB_DATABASE`, `DB_USER` y `DB_PASSWORD` con los datos de tu SQL Server. No compartas ni subas `.env`.
+3. Asegúrate de que `producto` y `variante_producto` tengan registros, y de que los productos tengan al menos una variante con `stock > 0`. El precio mostrado es el menor precio entre las variantes disponibles.
+4. En una terminal ejecuta `pnpm api:dev` para iniciar el API. En otra, ejecuta `pnpm dev` para iniciar la interfaz. Vite reenvía `/api` al servidor local en el puerto 3001.
+
+El filtro de colección usa el campo `estilo` de `producto`; los valores disponibles aparecerán automáticamente como filtros. El carrito sigue siendo local a la interfaz, como antes. Para producción, despliega el API en un servidor accesible por la aplicación y define `VITE_API_URL` como la URL base del API; configura también `CORS_ORIGIN` en el API con el origen de la aplicación.

@@ -123,7 +123,7 @@ CREATE TABLE producto
 
     CONSTRAINT CK_producto_nombre_producto CHECK (nombre_producto NOT LIKE '%[^a-zA-ZαινσϊΑΙΝΣΪρΡ ]%'),
 
-    CONSTRAINT CK_producto_color CHECK (color NOT LIKE '%[^a-zA-ZαινσϊΑΙΝΣΪρΡ ]%'),
+    CONSTRAINT CK_producto_color CHECK (color NOT LIKE '%[^a-zA-ZαινσϊΑΙΝΣΪρΡ ]%')
 );
 GO
 
@@ -250,7 +250,7 @@ CREATE TABLE factura
 
 	descuento INT NOT NULL,
 
-    cantidad INT NOT NULL
+    cantidad INT NOT NULL,
 
     CONSTRAINT PK_factura PRIMARY KEY CLUSTERED (numero_factura ASC),
 
